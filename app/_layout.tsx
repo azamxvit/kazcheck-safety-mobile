@@ -6,7 +6,7 @@ export default function RootLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false, // Отключаем стандартные верхние заголовки
+        headerShown: false,
         tabBarActiveTintColor: Colors.primary,
         tabBarInactiveTintColor: Colors.textSecondary,
         tabBarStyle: {
@@ -44,6 +44,23 @@ export default function RootLayout() {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color, size }) => <Ionicons name="person-outline" size={size} color={color} />,
+        }}
+      />
+      
+      {/* Скрытый экран результата проверки */}
+      <Tabs.Screen
+        name="result"
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+
+      <Tabs.Screen
+        name="report"
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' },
         }}
       />
     </Tabs>

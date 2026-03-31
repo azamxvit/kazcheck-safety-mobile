@@ -1,11 +1,12 @@
 import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, StatusBar } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { globalStyles } from '../constants/Styles';
 import { CallHistoryCard } from '../components/widgets/CallHistoryCard';
 
-// Моковые данные для проверки (позже будем брать из API)
+// Моковые данные для проверки
 const MOCK_CALLS = [
   { id: 1, title: 'Фейковый банк', phone: '+7 707 123 4567', tag: 'Банковское мошенничество', complaints: 214, time: 'Сегодня, 14:30', risk: 'danger' as const },
   { id: 2, title: 'Инвест Профит', phone: '+7 707 123 4567', tag: 'Инвестиционные схемы', complaints: 156, time: 'Сегодня, 14:30', risk: 'danger' as const },
@@ -14,6 +15,7 @@ const MOCK_CALLS = [
 
 export default function Home() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
 
   return (
     <View style={globalStyles.container}>
@@ -41,7 +43,14 @@ export default function Home() {
               placeholderTextColor={Colors.textSecondary}
               keyboardType="phone-pad"
             />
-            <TouchableOpacity style={styles.searchButton}>
+            {/* Добавили onPress для перехода на экран результата */}
+            <TouchableOpacity 
+              style={styles.searchButton}
+              onPress={() => router.push({
+                pathname: '/result',
+                params: { phone: '+7 707 123 4567', risk: 'danger', percentage: '94' }
+              })}
+            >
               <Ionicons name="search" size={20} color="#fff" />
             </TouchableOpacity>
           </View>
@@ -89,30 +98,98 @@ export default function Home() {
           />
         ))}
         
-        <View style={{ height: 40 }} /> {/* Отступ снизу для табов */}
+        <View style={{ height: 40 }} />
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  // ... (здесь старые стили шапки и поиска остаются без изменений)
-  header: { backgroundColor: Colors.primary, paddingHorizontal: 20, paddingBottom: 60, borderBottomLeftRadius: 24, borderBottomRightRadius: 24 },
-  headerTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  logo: { fontSize: 28, fontWeight: 'bold', color: '#fff' },
-  subtitle: { fontSize: 14, color: '#E0EBFF', marginTop: 4 },
-  searchContainer: { paddingHorizontal: 20, marginTop: -40, zIndex: 10 },
-  searchLabel: { fontSize: 14, color: Colors.text, marginBottom: 12 },
-  inputRow: { flexDirection: 'row', gap: 12 },
-  input: { flex: 1, height: 48, borderWidth: 1, borderColor: Colors.border, borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: Colors.text },
-  searchButton: { width: 48, height: 48, backgroundColor: Colors.primary, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
+  header: { 
+    backgroundColor: Colors.primary, 
+    paddingHorizontal: 20, 
+    paddingBottom: 60, 
+    borderBottomLeftRadius: 24, 
+    borderBottomRightRadius: 24 
+  },
+  headerTop: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center' 
+  },
+  logo: { 
+    fontSize: 28, 
+    fontWeight: 'bold', 
+    color: '#fff' 
+  },
+  subtitle: { 
+    fontSize: 14, 
+    color: '#E0EBFF', 
+    marginTop: 4 
+  },
+  searchContainer: { 
+    paddingHorizontal: 20, 
+    marginTop: -40, 
+    zIndex: 10 
+  },
+  searchLabel: { 
+    fontSize: 14, 
+    color: Colors.text, 
+    marginBottom: 12 
+  },
+  inputRow: {
+   flexDirection: 'row', 
+   gap: 12 
+  },
+  input: { 
+    flex: 1, 
+    height: 48, 
+    borderWidth: 1, 
+    borderColor: Colors.border, 
+    borderRadius: 12, 
+    paddingHorizontal: 16, 
+    fontSize: 16, 
+    color: Colors.text 
+  },
+  searchButton: { 
+    width: 48, 
+    height: 48, 
+    backgroundColor: Colors.primary, 
+    borderRadius: 12, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
   scrollContent: { padding: 20 },
-  
-  // Новые стили для статистики
-  statsRow: { flexDirection: 'row', gap: 12, marginBottom: 24 },
-  statBox: { flex: 1, marginBottom: 0, padding: 16, alignItems: 'center' },
-  statHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 8 },
-  statNumber: { fontSize: 24, fontWeight: 'bold', color: Colors.text },
-  statDesc: { fontSize: 12, color: Colors.textSecondary, textAlign: 'center' },
-  linkText: { color: Colors.primary, fontSize: 16, fontWeight: '500' },
+  statsRow: { 
+    flexDirection: 'row', 
+    gap: 12, 
+    marginBottom: 24 
+  },
+  statBox: { 
+    flex: 1, 
+    marginBottom: 0, 
+    padding: 16, 
+    alignItems: 'center' 
+  },
+  statHeader: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    gap: 8, 
+    marginBottom: 8 
+  },
+  statNumber: { 
+    fontSize: 24, 
+    fontWeight: 'bold', 
+    color: Colors.text 
+  },
+  statDesc: { 
+    fontSize: 12, 
+    color: Colors.textSecondary, 
+    textAlign: 'center' 
+  },
+  linkText: { 
+    color: Colors.primary, 
+    fontSize: 16, 
+    fontWeight: '500' 
+  },
 });
