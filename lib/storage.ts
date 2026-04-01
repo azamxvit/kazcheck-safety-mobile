@@ -16,4 +16,4 @@ export const storage = {
       console.error('Error reading data', e);
     }
   },
-}
+};

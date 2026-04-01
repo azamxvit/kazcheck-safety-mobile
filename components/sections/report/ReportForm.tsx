@@ -9,7 +9,7 @@ const SCAM_TYPES = [
   'Фейковая полиция',
   'Кредитные схемы',
   'Спам звонки',
-  'Другое'
+  'Другое',
 ];
 
 export function ReportForm() {
@@ -51,9 +51,7 @@ export function ReportForm() {
                 style={[styles.typeButton, isSelected && styles.typeButtonActive]}
                 onPress={() => setSelectedType(type)}
               >
-                <Text style={[styles.typeText, isSelected && styles.typeTextActive]}>
-                  {type}
-                </Text>
+                <Text style={[styles.typeText, isSelected && styles.typeTextActive]}>{type}</Text>
               </TouchableOpacity>
             );
           })}

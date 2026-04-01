@@ -20,7 +20,7 @@ export function RiskIndicatorCard({ config, percentage }: Props) {
           <Text style={styles.desc}>{config.desc}</Text>
         </View>
       </View>
-      
+
       <View style={styles.progressSection}>
         <View style={globalStyles.textRow}>
           <Text style={styles.progressLabel}>Уровень риска</Text>
@@ -33,36 +33,36 @@ export function RiskIndicatorCard({ config, percentage }: Props) {
 }
 
 const styles = StyleSheet.create({
-  card: { 
-    borderRadius: 16, 
-    padding: 20, 
-    marginBottom: 20 
+  card: {
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
   },
-  header: { 
-    flexDirection: 'row', 
-    alignItems: 'flex-start', 
-    marginBottom: 20 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 20,
   },
-  textContent: { 
-    flex: 1, 
-    marginLeft: 12 
+  textContent: {
+    flex: 1,
+    marginLeft: 12,
   },
-  title: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 4 
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 4,
   },
-  desc: { 
-    fontSize: 14, 
-    color: Colors.text, 
-    opacity: 0.8, 
-    lineHeight: 20 
+  desc: {
+    fontSize: 14,
+    color: Colors.text,
+    opacity: 0.8,
+    lineHeight: 20,
   },
   progressSection: { marginTop: 8 },
   progressLabel: { fontSize: 14, color: Colors.text },
-  progressValue: { 
-    fontSize: 18, 
-    fontWeight: 'bold', 
-    marginBottom: 8 
+  progressValue: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
 });

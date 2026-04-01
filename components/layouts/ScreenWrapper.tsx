@@ -4,11 +4,7 @@ import { Colors } from '../../constants/Colors';
 
 export const ScreenWrapper = ({ children }: { children: React.ReactNode }) => {
   const insets = useSafeAreaInsets();
-  return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {children}
-    </View>
-  );
+  return <View style={[styles.container, { paddingTop: insets.top }]}>{children}</View>;
 };
 
 const styles = StyleSheet.create({

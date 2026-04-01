@@ -1,4 +1,12 @@
-import { View, Text, StyleSheet, ScrollView, TextInput, TouchableOpacity, StatusBar } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  TouchableOpacity,
+  StatusBar,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,9 +16,33 @@ import { CallHistoryCard } from '../components/widgets/CallHistoryCard';
 
 // Моковые данные для проверки
 const MOCK_CALLS = [
-  { id: 1, title: 'Фейковый банк', phone: '+7 707 123 4567', tag: 'Банковское мошенничество', complaints: 214, time: 'Сегодня, 14:30', risk: 'danger' as const },
-  { id: 2, title: 'Инвест Профит', phone: '+7 707 123 4567', tag: 'Инвестиционные схемы', complaints: 156, time: 'Сегодня, 14:30', risk: 'danger' as const },
-  { id: 3, title: 'Фейковый банк', phone: '+7 707 123 4567', tag: 'Кредитные схемы', complaints: 42, time: 'Сегодня, 14:30', risk: 'warning' as const },
+  {
+    id: 1,
+    title: 'Фейковый банк',
+    phone: '+7 707 123 4567',
+    tag: 'Банковское мошенничество',
+    complaints: 214,
+    time: 'Сегодня, 14:30',
+    risk: 'danger' as const,
+  },
+  {
+    id: 2,
+    title: 'Инвест Профит',
+    phone: '+7 707 123 4567',
+    tag: 'Инвестиционные схемы',
+    complaints: 156,
+    time: 'Сегодня, 14:30',
+    risk: 'danger' as const,
+  },
+  {
+    id: 3,
+    title: 'Фейковый банк',
+    phone: '+7 707 123 4567',
+    tag: 'Кредитные схемы',
+    complaints: 42,
+    time: 'Сегодня, 14:30',
+    risk: 'warning' as const,
+  },
 ];
 
 export default function Home() {
@@ -20,7 +52,7 @@ export default function Home() {
   return (
     <View style={globalStyles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-      
+
       {/* СЕКЦИЯ: Синяя шапка */}
       <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <View style={styles.headerTop}>
@@ -37,19 +69,21 @@ export default function Home() {
         <View style={globalStyles.card}>
           <Text style={styles.searchLabel}>Проверить номер телефона</Text>
           <View style={styles.inputRow}>
-            <TextInput 
+            <TextInput
               style={styles.input}
               placeholder="+ 7 XXX XXX XXXX"
               placeholderTextColor={Colors.textSecondary}
               keyboardType="phone-pad"
             />
             {/* Добавили onPress для перехода на экран результата */}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.searchButton}
-              onPress={() => router.push({
-                pathname: '/result',
-                params: { phone: '+7 707 123 4567', risk: 'danger', percentage: '94' }
-              })}
+              onPress={() =>
+                router.push({
+                  pathname: '/result',
+                  params: { phone: '+7 707 123 4567', risk: 'danger', percentage: '94' },
+                })
+              }
             >
               <Ionicons name="search" size={20} color="#fff" />
             </TouchableOpacity>
@@ -58,7 +92,6 @@ export default function Home() {
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        
         {/* СЕКЦИЯ: Статистика за неделю */}
         <View style={styles.statsRow}>
           <View style={[globalStyles.card, styles.statBox]}>
@@ -97,7 +130,7 @@ export default function Home() {
             riskLevel={call.risk}
           />
         ))}
-        
+
         <View style={{ height: 40 }} />
       </ScrollView>
     </View>
@@ -105,91 +138,91 @@ export default function Home() {
 }
 
 const styles = StyleSheet.create({
-  header: { 
-    backgroundColor: Colors.primary, 
-    paddingHorizontal: 20, 
-    paddingBottom: 60, 
-    borderBottomLeftRadius: 24, 
-    borderBottomRightRadius: 24 
+  header: {
+    backgroundColor: Colors.primary,
+    paddingHorizontal: 20,
+    paddingBottom: 60,
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
   },
-  headerTop: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center' 
+  headerTop: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
-  logo: { 
-    fontSize: 28, 
-    fontWeight: 'bold', 
-    color: '#fff' 
+  logo: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#fff',
   },
-  subtitle: { 
-    fontSize: 14, 
-    color: '#E0EBFF', 
-    marginTop: 4 
+  subtitle: {
+    fontSize: 14,
+    color: '#E0EBFF',
+    marginTop: 4,
   },
-  searchContainer: { 
-    paddingHorizontal: 20, 
-    marginTop: -40, 
-    zIndex: 10 
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: -40,
+    zIndex: 10,
   },
-  searchLabel: { 
-    fontSize: 14, 
-    color: Colors.text, 
-    marginBottom: 12 
+  searchLabel: {
+    fontSize: 14,
+    color: Colors.text,
+    marginBottom: 12,
   },
   inputRow: {
-   flexDirection: 'row', 
-   gap: 12 
+    flexDirection: 'row',
+    gap: 12,
   },
-  input: { 
-    flex: 1, 
-    height: 48, 
-    borderWidth: 1, 
-    borderColor: Colors.border, 
-    borderRadius: 12, 
-    paddingHorizontal: 16, 
-    fontSize: 16, 
-    color: Colors.text 
+  input: {
+    flex: 1,
+    height: 48,
+    borderWidth: 1,
+    borderColor: Colors.border,
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    color: Colors.text,
   },
-  searchButton: { 
-    width: 48, 
-    height: 48, 
-    backgroundColor: Colors.primary, 
-    borderRadius: 12, 
-    justifyContent: 'center', 
-    alignItems: 'center' 
+  searchButton: {
+    width: 48,
+    height: 48,
+    backgroundColor: Colors.primary,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollContent: { padding: 20 },
-  statsRow: { 
-    flexDirection: 'row', 
-    gap: 12, 
-    marginBottom: 24 
+  statsRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginBottom: 24,
   },
-  statBox: { 
-    flex: 1, 
-    marginBottom: 0, 
-    padding: 16, 
-    alignItems: 'center' 
+  statBox: {
+    flex: 1,
+    marginBottom: 0,
+    padding: 16,
+    alignItems: 'center',
   },
-  statHeader: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 8, 
-    marginBottom: 8 
+  statHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
   },
-  statNumber: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    color: Colors.text 
+  statNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.text,
   },
-  statDesc: { 
-    fontSize: 12, 
-    color: Colors.textSecondary, 
-    textAlign: 'center' 
+  statDesc: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    textAlign: 'center',
   },
-  linkText: { 
-    color: Colors.primary, 
-    fontSize: 16, 
-    fontWeight: '500' 
+  linkText: {
+    color: Colors.primary,
+    fontSize: 16,
+    fontWeight: '500',
   },
 });

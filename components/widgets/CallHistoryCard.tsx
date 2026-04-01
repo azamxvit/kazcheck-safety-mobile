@@ -12,7 +12,14 @@ type CallHistoryCardProps = {
   riskLevel: 'danger' | 'warning' | 'success';
 };
 
-export function CallHistoryCard({ title, phone, tagText, complaints, time, riskLevel }: CallHistoryCardProps) {
+export function CallHistoryCard({
+  title,
+  phone,
+  tagText,
+  complaints,
+  time,
+  riskLevel,
+}: CallHistoryCardProps) {
   const isDanger = riskLevel === 'danger';
   const iconColor = isDanger ? Colors.danger : Colors.warning;
 
@@ -30,12 +37,12 @@ export function CallHistoryCard({ title, phone, tagText, complaints, time, riskL
           <Ionicons name="chevron-forward" size={20} color={Colors.border} />
         </View>
         <Text style={styles.phone}>{phone}</Text>
-        
+
         <View style={styles.tagRow}>
           <Badge text={tagText} type={riskLevel} />
           <Text style={styles.complaints}>{complaints} жалоб</Text>
         </View>
-        
+
         <Text style={styles.time}>{time}</Text>
       </View>
     </TouchableOpacity>

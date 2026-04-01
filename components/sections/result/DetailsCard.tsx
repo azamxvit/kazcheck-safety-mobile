@@ -34,32 +34,34 @@ export function DetailsCard({ scamType, complaintsCount }: Props) {
 }
 
 const styles = StyleSheet.create({
-  row: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    paddingVertical: 12 },
-  labelWrapper: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    gap: 8 },
-  labelTitle: { 
-    fontSize: 16, 
-    fontWeight: '600', 
-    color: Colors.text 
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 12,
   },
-  textLeft: { 
-    fontSize: 14, 
-    color: Colors.textSecondary 
+  labelWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  textRightBold: { 
-    fontSize: 14, 
-    fontWeight: '600', 
-    color: Colors.text 
+  labelTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: Colors.text,
   },
-  divider: { 
-    height: 1, 
-    backgroundColor: Colors.border, 
-    width: '100%' 
+  textLeft: {
+    fontSize: 14,
+    color: Colors.textSecondary,
+  },
+  textRightBold: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.text,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: Colors.border,
+    width: '100%',
   },
 });

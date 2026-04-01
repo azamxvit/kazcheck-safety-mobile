@@ -10,12 +10,7 @@ export function ProgressBar({ percentage, color }: ProgressBarProps) {
 
   return (
     <View style={styles.track}>
-      <View 
-        style={[
-          styles.fill, 
-          { width: `${safePercentage}%`, backgroundColor: color }
-        ]} 
-      />
+      <View style={[styles.fill, { width: `${safePercentage}%`, backgroundColor: color }]} />
     </View>
   );
 }
@@ -23,7 +18,7 @@ export function ProgressBar({ percentage, color }: ProgressBarProps) {
 const styles = StyleSheet.create({
   track: {
     height: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.05)', 
+    backgroundColor: 'rgba(0, 0, 0, 0.05)',
     borderRadius: 4,
     width: '100%',
     overflow: 'hidden',

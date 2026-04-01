@@ -9,10 +9,14 @@ type BadgeProps = {
 export function Badge({ text, type = 'danger' }: BadgeProps) {
   const getStyles = () => {
     switch (type) {
-      case 'danger': return { bg: Colors.dangerLight, text: Colors.danger };
-      case 'warning': return { bg: Colors.warningLight, text: Colors.warning };
-      case 'success': return { bg: Colors.successLight, text: Colors.success };
-      default: return { bg: '#F0F0F0', text: Colors.textSecondary };
+      case 'danger':
+        return { bg: Colors.dangerLight, text: Colors.danger };
+      case 'warning':
+        return { bg: Colors.warningLight, text: Colors.warning };
+      case 'success':
+        return { bg: Colors.successLight, text: Colors.success };
+      default:
+        return { bg: '#F0F0F0', text: Colors.textSecondary };
     }
   };
 

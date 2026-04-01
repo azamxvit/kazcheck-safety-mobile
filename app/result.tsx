@@ -11,17 +11,16 @@ import { DetailsCard } from '../components/sections/result/DetailsCard';
 export default function ResultScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  
+
   const params = useLocalSearchParams();
   const phone = (params.phone as string) || '+ 7 707 123 4567';
   const riskType = (params.risk as RiskType) || 'danger';
   const percentage = Number(params.percentage) || 94;
-  
+
   const config = RISK_CONFIG[riskType] || RISK_CONFIG.danger;
 
   return (
     <View style={[globalStyles.container, { paddingTop: insets.top }]}>
-      
       {/* Шапка */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
@@ -32,7 +31,6 @@ export default function ResultScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
         {/* Номер телефона */}
         <View style={styles.phoneSection}>
           <View style={styles.phoneIconWrapper}>
@@ -43,7 +41,7 @@ export default function ResultScreen() {
         </View>
 
         <RiskIndicatorCard config={config} percentage={percentage} />
-        
+
         <DetailsCard scamType="Банковское мошенничество" complaintsCount={214} />
 
         {/* Кнопки действий */}
@@ -52,86 +50,86 @@ export default function ResultScreen() {
             <Ionicons name="flag-outline" size={20} color="#fff" />
             <Text style={styles.primaryButtonText}>Сообщить о мошеннике</Text>
           </TouchableOpacity>
-          
+
           <TouchableOpacity style={styles.secondaryButton} onPress={() => router.push('/')}>
             <Text style={styles.secondaryButtonText}>Вернуться на главную</Text>
           </TouchableOpacity>
         </View>
-
       </ScrollView>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: { flexDirection: 'row', 
-    alignItems: 'center', 
-    justifyContent: 'space-between', 
-    paddingHorizontal: 20, 
-    paddingVertical: 16, 
-    backgroundColor: Colors.surface 
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    backgroundColor: Colors.surface,
   },
   backButton: { padding: 4 },
-  headerTitle: { 
-    fontSize: 18, 
-    fontWeight: '600', 
-    color: Colors.text 
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: Colors.text,
   },
   content: { padding: 20 },
-  phoneSection: { 
-    alignItems: 'center', 
-    marginBottom: 24, 
-    marginTop: 10 
+  phoneSection: {
+    alignItems: 'center',
+    marginBottom: 24,
+    marginTop: 10,
   },
-  phoneIconWrapper: { 
-    width: 56, 
-    height: 56, 
-    borderRadius: 28, 
-    backgroundColor: Colors.border, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    marginBottom: 12 
+  phoneIconWrapper: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
   },
-  phoneNumber: { 
-    fontSize: 24, 
-    fontWeight: 'bold', 
-    color: Colors.text, 
-    marginBottom: 4 
+  phoneNumber: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: Colors.text,
+    marginBottom: 4,
   },
-  phoneId: { 
-    fontSize: 14, 
-    color: Colors.textSecondary 
+  phoneId: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
-  actionButtons: { 
-    marginTop: 24, 
-    gap: 12 
+  actionButtons: {
+    marginTop: 24,
+    gap: 12,
   },
-  primaryButton: { 
-    backgroundColor: Colors.primary, 
-    height: 56, 
-    borderRadius: 16, 
-    flexDirection: 'row', 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    gap: 8 
+  primaryButton: {
+    backgroundColor: Colors.primary,
+    height: 56,
+    borderRadius: 16,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
   },
-  primaryButtonText: { 
-    color: '#fff', 
-    fontSize: 16, 
-    fontWeight: '600' 
+  primaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
-  secondaryButton: { 
-    backgroundColor: Colors.surface, 
-    height: 56, 
-    borderRadius: 16, 
-    justifyContent: 'center', 
-    alignItems: 'center', 
-    borderWidth: 1, 
-    borderColor: Colors.border 
+  secondaryButton: {
+    backgroundColor: Colors.surface,
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Colors.border,
   },
-  secondaryButtonText: { 
-    color: Colors.text, 
-    fontSize: 16, 
-    fontWeight: '600' 
+  secondaryButtonText: {
+    color: Colors.text,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
