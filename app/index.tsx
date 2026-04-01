@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,6 +7,8 @@ import {
   TextInput,
   TouchableOpacity,
   StatusBar,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,7 +17,8 @@ import { Colors } from '../constants/Colors';
 import { globalStyles } from '../constants/Styles';
 import { CallHistoryCard } from '../components/widgets/CallHistoryCard';
 
-// Моковые данные для проверки
+import { supabase } from '../supabase';
+
 const MOCK_CALLS = [
   {
     id: 1,
@@ -49,11 +53,50 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
 
+  const [phoneNumber, setPhoneNumber] = useState('+7');
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Функция проверки номера
+  const handleCheckNumber = async () => {
+    // Базовая валидация длины номера
+    if (phoneNumber.length < 11) {
+      Alert.alert('Ошибка', 'Введите корректный номер телефона (минимум 11 символов)');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('check-number', {
+        body: { phone: phoneNumber },
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const riskData = data?.data || {};
+
+      // Переходим на экран результата с реальными данными
+      router.push({
+        pathname: '/result',
+        params: {
+          phone: phoneNumber,
+          risk: riskData.risk_level || 'unknown',
+          percentage: (riskData.risk_score || 0).toString(),
+        },
+      });
+    } catch (err: any) {
+      Alert.alert('Ошибка соединения', err.message || 'Не удалось проверить номер');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <View style={globalStyles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
 
-      {/* СЕКЦИЯ: Синяя шапка */}
+      {/* Синяя шапка */}
       <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
         <View style={styles.headerTop}>
           <View>
@@ -64,35 +107,39 @@ export default function Home() {
         </View>
       </View>
 
-      {/* СЕКЦИЯ: Поиск */}
+      {/* Поиск */}
       <View style={styles.searchContainer}>
         <View style={globalStyles.card}>
           <Text style={styles.searchLabel}>Проверить номер телефона</Text>
           <View style={styles.inputRow}>
             <TextInput
               style={styles.input}
-              placeholder="+ 7 XXX XXX XXXX"
+              placeholder="+7 XXX XXX XXXX"
               placeholderTextColor={Colors.textSecondary}
               keyboardType="phone-pad"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              editable={!isLoading}
             />
-            {/* Добавили onPress для перехода на экран результата */}
+
+            {/* Кнопка с индикатором загрузки */}
             <TouchableOpacity
-              style={styles.searchButton}
-              onPress={() =>
-                router.push({
-                  pathname: '/result',
-                  params: { phone: '+7 707 123 4567', risk: 'danger', percentage: '94' },
-                })
-              }
+              style={[styles.searchButton, isLoading && styles.searchButtonDisabled]}
+              onPress={handleCheckNumber}
+              disabled={isLoading}
             >
-              <Ionicons name="search" size={20} color="#fff" />
+              {isLoading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <Ionicons name="search" size={20} color="#fff" />
+              )}
             </TouchableOpacity>
           </View>
         </View>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* СЕКЦИЯ: Статистика за неделю */}
+        {/* Статистика за неделю */}
         <View style={styles.statsRow}>
           <View style={[globalStyles.card, styles.statBox]}>
             <View style={styles.statHeader}>
@@ -110,7 +157,7 @@ export default function Home() {
           </View>
         </View>
 
-        {/* СЕКЦИЯ: Проверенные звонки */}
+        {/* Проверенные звонки */}
         <View style={globalStyles.textRow}>
           <Text style={globalStyles.title}>Проверенные звонки</Text>
           <TouchableOpacity>
@@ -191,6 +238,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  searchButtonDisabled: {
+    opacity: 0.7,
   },
   scrollContent: { padding: 20 },
   statsRow: {

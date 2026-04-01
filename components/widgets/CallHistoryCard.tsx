@@ -4,6 +4,7 @@ import { Colors } from '../../constants/Colors';
 import { Badge } from '../shared/Badge';
 
 type CallHistoryCardProps = {
+  key?: string | number;
   title: string;
   phone: string;
   tagText: string;
