@@ -1,88 +1,115 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { globalStyles } from '../../../constants/Styles';
+import { supabase } from '../../../supabase'; // <-- Путь до твоего index.ts с клиентом
 
 const SCAM_TYPES = [
   'Банковское мошенничество',
+  'Фейковый интернет-магазин',
   'Инвестиционные схемы',
-  'Фейковая полиция',
-  'Кредитные схемы',
-  'Спам звонки',
-  'Другое',
+  'Спам / Реклама',
+  'Другое'
 ];
 
-export function ReportForm() {
-  const [phone, setPhone] = useState('+7 ');
-  const [selectedType, setSelectedType] = useState<string | null>(null);
-  const [description, setDescription] = useState('');
+interface ReportFormProps {
+  initialPhone?: string;
+}
 
-  const isFormValid = phone.length > 5 && selectedType !== null;
+export function ReportForm({ initialPhone = '' }: ReportFormProps) {
+  const router = useRouter();
+  
+  // Состояния (State) нашей формы
+  const [phone, setPhone] = useState(initialPhone);
+  const [scamType, setScamType] = useState(SCAM_TYPES[0]);
+  const [comment, setComment] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = () => {
-    if (!isFormValid) return;
-    console.log('Отправка жалобы:', { phone, selectedType, description });
+  const handleSubmit = async () => {
+    if (!phone.trim()) {
+      Alert.alert('Ошибка', 'Пожалуйста, введите номер телефона');
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const { error } = await supabase
+        .from('reports')
+        .insert({
+          phone: phone.trim(),
+          scam_type: scamType,
+          comment: comment.trim()
+        });
+
+      if (error) throw error;
+
+      // 3. Если всё ок — показываем успех и возвращаем на главную
+      Alert.alert('Успех!', 'Спасибо за жалобу. Вы помогаете сделать связь безопаснее.', [
+        { text: 'ОК', onPress: () => router.replace('/') }
+      ]);
+
+    } catch (error: any) {
+      Alert.alert('Ошибка при отправке', error.message || 'Попробуйте позже');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <View style={styles.container}>
+      
       {/* Поле: Номер телефона */}
-      <View style={styles.field}>
-        <Text style={styles.label}>Номер телефона *</Text>
-        <TextInput
-          style={styles.input}
-          value={phone}
-          onChangeText={setPhone}
-          keyboardType="phone-pad"
-          placeholder="+7 (7XX) XXX-XX-XX"
-          placeholderTextColor={Colors.textSecondary}
-        />
-      </View>
+      <Text style={styles.label}>Номер телефона</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="+7 (7XX) XXX XX XX"
+        value={phone}
+        onChangeText={setPhone}
+        keyboardType="phone-pad"
+        editable={!isSubmitting}
+      />
 
       {/* Поле: Тип мошенничества */}
-      <View style={styles.field}>
-        <Text style={styles.label}>Тип мошенничества *</Text>
-        <View style={styles.typeGrid}>
-          {SCAM_TYPES.map((type) => {
-            const isSelected = selectedType === type;
-            return (
-              <TouchableOpacity
-                key={type}
-                style={[styles.typeButton, isSelected && styles.typeButtonActive]}
-                onPress={() => setSelectedType(type)}
-              >
-                <Text style={[styles.typeText, isSelected && styles.typeTextActive]}>{type}</Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+      <Text style={styles.label}>Тип угрозы</Text>
+      <View style={styles.chipsContainer}>
+        {SCAM_TYPES.map((type) => (
+          <TouchableOpacity
+            key={type}
+            style={[styles.chip, scamType === type && styles.chipActive]}
+            onPress={() => setScamType(type)}
+            disabled={isSubmitting}
+          >
+            <Text style={[styles.chipText, scamType === type && styles.chipTextActive]}>
+              {type}
+            </Text>
+          </TouchableOpacity>
+        ))}
       </View>
 
-      {/* Поле: Описание */}
-      <View style={styles.field}>
-        <Text style={styles.label}>Описание ситуации (необязательно)</Text>
-        <TextInput
-          style={[styles.input, styles.textArea]}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Расскажите, что произошло..."
-          placeholderTextColor={Colors.textSecondary}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-        />
-        <Text style={styles.hint}>
-          Ваше описание поможет другим пользователям распознать мошенников
-        </Text>
-      </View>
+      {/* Поле: Комментарий */}
+      <Text style={styles.label}>Детали (необязательно)</Text>
+      <TextInput
+        style={[styles.input, styles.textArea]}
+        placeholder="Что они говорили? Как представились?"
+        value={comment}
+        onChangeText={setComment}
+        multiline
+        numberOfLines={4}
+        editable={!isSubmitting}
+      />
 
       {/* Кнопка отправки */}
-      <TouchableOpacity
-        style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
-        disabled={!isFormValid}
+      <TouchableOpacity 
+        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]} 
         onPress={handleSubmit}
+        disabled={isSubmitting}
       >
-        <Text style={styles.submitButtonText}>Отправить жалобу</Text>
+        {isSubmitting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.submitButtonText}>Отправить жалобу</Text>
+        )}
       </TouchableOpacity>
     </View>
   );
@@ -92,57 +119,50 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
   },
-  field: {
-    marginBottom: 24,
-  },
   label: {
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: '600',
     color: Colors.text,
     marginBottom: 8,
-    fontWeight: '500',
+    marginTop: 16,
   },
   input: {
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
     borderRadius: 12,
-    paddingHorizontal: 16,
-    height: 52,
+    padding: 16,
     fontSize: 16,
     color: Colors.text,
   },
   textArea: {
-    height: 120,
-    paddingTop: 16,
+    height: 100,
+    textAlignVertical: 'top',
   },
-  typeGrid: {
+  chipsContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
   },
-  typeButton: {
+  chip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
     backgroundColor: Colors.surface,
     borderWidth: 1,
     borderColor: Colors.border,
-    borderRadius: 12,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
   },
-  typeButtonActive: {
+  chipActive: {
+    backgroundColor: Colors.primary,
     borderColor: Colors.primary,
-    backgroundColor: '#F0F5FF', // Очень светлый синий фон для выбранного
   },
-  typeText: {
-    fontSize: 15,
-    color: Colors.text,
-    fontWeight: '500',
-  },
-  typeTextActive: {
-    color: Colors.primary,
-  },
-  hint: {
-    fontSize: 13,
+  chipText: {
     color: Colors.textSecondary,
-    marginTop: 8,
-    lineHeight: 18,
+    fontSize: 14,
+  },
+  chipTextActive: {
+    color: '#fff',
+    fontWeight: '600',
   },
   submitButton: {
     backgroundColor: Colors.primary,
@@ -150,10 +170,10 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 32,
   },
   submitButtonDisabled: {
-    backgroundColor: '#D1D1D6', // Серый цвет, если форма не заполнена
+    opacity: 0.7,
   },
   submitButtonText: {
     color: '#fff',

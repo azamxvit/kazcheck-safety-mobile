@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router'; // <-- Добавили useLocalSearchParams
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { Colors } from '../constants/Colors';
@@ -9,6 +9,10 @@ import { ReportForm } from '../components/sections/report/ReportForm';
 export default function ReportScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  
+  // Достаем номер из параметров (если он есть)
+  const params = useLocalSearchParams();
+  const phoneParam = (params.phone as string) || '';
 
   return (
     <View style={[globalStyles.container, { paddingTop: insets.top }]}>
@@ -23,7 +27,8 @@ export default function ReportScreen() {
 
       {/* Основной контент */}
       <ScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-        <ReportForm />
+        {/* Передаем номер в форму */}
+        <ReportForm initialPhone={phoneParam} /> 
       </ScrollView>
     </View>
   );
