@@ -82,3 +82,4 @@ kazcheck-safety-mobile/
   └── supabase/            # Backend Setup
       ├── index.ts         # Supabase Client Init
       └── database.types.ts# Auto-generated DB types
+```

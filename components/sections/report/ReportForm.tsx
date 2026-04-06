@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors } from '../../../constants/Colors';
-import { supabase } from '../../../supabase'; // <-- Путь до твоего index.ts с клиентом
+import { supabase } from '../../../supabase';
 
 const SCAM_TYPES = [
   'Банковское мошенничество',
   'Фейковый интернет-магазин',
   'Инвестиционные схемы',
   'Спам / Реклама',
-  'Другое'
+  'Другое',
 ];
 
 interface ReportFormProps {
@@ -18,8 +26,7 @@ interface ReportFormProps {
 
 export function ReportForm({ initialPhone = '' }: ReportFormProps) {
   const router = useRouter();
-  
-  // Состояния (State) нашей формы
+
   const [phone, setPhone] = useState(initialPhone);
   const [scamType, setScamType] = useState(SCAM_TYPES[0]);
   const [comment, setComment] = useState('');
@@ -34,21 +41,17 @@ export function ReportForm({ initialPhone = '' }: ReportFormProps) {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase
-        .from('reports')
-        .insert({
-          phone: phone.trim(),
-          scam_type: scamType,
-          comment: comment.trim()
-        });
+      const { error } = await supabase.from('reports').insert({
+        phone: phone.trim(),
+        scam_type: scamType,
+        comment: comment.trim(),
+      });
 
       if (error) throw error;
 
-      // 3. Если всё ок — показываем успех и возвращаем на главную
       Alert.alert('Успех!', 'Спасибо за жалобу. Вы помогаете сделать связь безопаснее.', [
-        { text: 'ОК', onPress: () => router.replace('/') }
+        { text: 'ОК', onPress: () => router.replace('/') },
       ]);
-
     } catch (error: any) {
       Alert.alert('Ошибка при отправке', error.message || 'Попробуйте позже');
     } finally {
@@ -58,7 +61,6 @@ export function ReportForm({ initialPhone = '' }: ReportFormProps) {
 
   return (
     <View style={styles.container}>
-      
       {/* Поле: Номер телефона */}
       <Text style={styles.label}>Номер телефона</Text>
       <TextInput
@@ -100,8 +102,8 @@ export function ReportForm({ initialPhone = '' }: ReportFormProps) {
       />
 
       {/* Кнопка отправки */}
-      <TouchableOpacity 
-        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]} 
+      <TouchableOpacity
+        style={[styles.submitButton, isSubmitting && styles.submitButtonDisabled]}
         onPress={handleSubmit}
         disabled={isSubmitting}
       >

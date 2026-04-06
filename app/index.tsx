@@ -4,20 +4,18 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TextInput,
   TouchableOpacity,
   StatusBar,
-  ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/Colors';
-import { globalStyles } from '../constants/Styles';
-import { CallHistoryCard } from '../components/widgets/CallHistoryCard';
-
 import { supabase } from '../supabase';
+
+import { HomeHeader } from '../components/sections/home/HomeHeader';
+import { MiniStatsCard } from '../components/widgets/home/MiniStatsCard';
+import { CallHistoryCard } from '../components/widgets/home/CallHistoryCard';
 
 const MOCK_CALLS = [
   {
@@ -49,16 +47,12 @@ const MOCK_CALLS = [
   },
 ];
 
-export default function Home() {
-  const insets = useSafeAreaInsets();
+export default function HomeScreen() {
   const router = useRouter();
-
   const [phoneNumber, setPhoneNumber] = useState('+7');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Функция проверки номера
   const handleCheckNumber = async () => {
-    // Базовая валидация длины номера
     if (phoneNumber.length < 11) {
       Alert.alert('Ошибка', 'Введите корректный номер телефона (минимум 11 символов)');
       return;
@@ -70,13 +64,10 @@ export default function Home() {
         body: { phone: phoneNumber },
       });
 
-      if (error) {
-        throw new Error(error.message);
-      }
+      if (error) throw new Error(error.message);
 
       const riskData = data?.data || {};
 
-      // Переходим на экран результата с реальными данными
       router.push({
         pathname: '/result',
         params: {
@@ -93,186 +84,106 @@ export default function Home() {
   };
 
   return (
-    <View style={globalStyles.container}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
 
-      {/* Синяя шапка */}
-      <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text style={styles.logo}>KazCheck</Text>
-            <Text style={styles.subtitle}>Защита от мошенников</Text>
-          </View>
-          <Ionicons name="shield-checkmark-outline" size={32} color="#fff" />
-        </View>
-      </View>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        bounces={false}
+        contentContainerStyle={{ paddingBottom: 100 }}
+      >
+        <HomeHeader
+          phoneNumber={phoneNumber}
+          onChangePhoneNumber={setPhoneNumber}
+          onSearch={handleCheckNumber}
+          isLoading={isLoading}
+        />
 
-      {/* Поиск */}
-      <View style={styles.searchContainer}>
-        <View style={globalStyles.card}>
-          <Text style={styles.searchLabel}>Проверить номер телефона</Text>
-          <View style={styles.inputRow}>
-            <TextInput
-              style={styles.input}
-              placeholder="+7 XXX XXX XXXX"
-              placeholderTextColor={Colors.textSecondary}
-              keyboardType="phone-pad"
-              value={phoneNumber}
-              onChangeText={setPhoneNumber}
-              editable={!isLoading}
-            />
+        <MiniStatsCard />
 
-            {/* Кнопка с индикатором загрузки */}
-            <TouchableOpacity
-              style={[styles.searchButton, isLoading && styles.searchButtonDisabled]}
-              onPress={handleCheckNumber}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator color="#fff" size="small" />
-              ) : (
-                <Ionicons name="search" size={20} color="#fff" />
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Статистика за неделю */}
-        <View style={styles.statsRow}>
-          <View style={[globalStyles.card, styles.statBox]}>
-            <View style={styles.statHeader}>
-              <Ionicons name="alert-circle-outline" size={20} color={Colors.danger} />
-              <Text style={styles.statNumber}>1,247</Text>
-            </View>
-            <Text style={styles.statDesc}>Мошенники за неделю</Text>
-          </View>
-          <View style={[globalStyles.card, styles.statBox]}>
-            <View style={styles.statHeader}>
-              <Ionicons name="trending-up-outline" size={20} color={Colors.primary} />
-              <Text style={styles.statNumber}>1,247</Text>
-            </View>
-            <Text style={styles.statDesc}>Новых жалоб за неделю</Text>
-          </View>
-        </View>
-
-        {/* Проверенные звонки */}
-        <View style={globalStyles.textRow}>
-          <Text style={globalStyles.title}>Проверенные звонки</Text>
+        {/* Заголовок списка */}
+        <View style={styles.listHeader}>
+          <Text style={styles.listTitle}>Проверенные звонки</Text>
           <TouchableOpacity>
-            <Text style={styles.linkText}>Все</Text>
+            <Text style={styles.listLink}>Все</Text>
           </TouchableOpacity>
         </View>
 
-        {/* Рендерим карточки из моковых данных */}
-        {MOCK_CALLS.map((call) => (
-          <CallHistoryCard
-            key={call.id}
-            title={call.title}
-            phone={call.phone}
-            tagText={call.tag}
-            complaints={call.complaints}
-            time={call.time}
-            riskLevel={call.risk}
-          />
-        ))}
-
-        <View style={{ height: 40 }} />
+        {/* Маппинг */}
+        <View style={styles.listContainer}>
+          {MOCK_CALLS.map((call) => (
+            <CallHistoryCard
+              key={call.id}
+              title={call.title}
+              phone={call.phone}
+              tagText={call.tag}
+              complaints={call.complaints}
+              time={call.time}
+              riskLevel={call.risk}
+            />
+          ))}
+        </View>
       </ScrollView>
+
+      {/* Плавающая кнопка */}
+      <TouchableOpacity
+        style={styles.fab}
+        activeOpacity={0.9}
+        onPress={() => router.push('/report')}
+      >
+        <Ionicons name="flag-outline" size={20} color="#fff" />
+        <Text style={styles.fabText}>Сообщить о мошеннике</Text>
+      </TouchableOpacity>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    backgroundColor: Colors.primary,
-    paddingHorizontal: 20,
-    paddingBottom: 60,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
   },
-  headerTop: {
+  listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginHorizontal: 20,
+    marginBottom: 16,
   },
-  logo: {
-    fontSize: 28,
+  listTitle: {
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#fff',
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#E0EBFF',
-    marginTop: 4,
-  },
-  searchContainer: {
-    paddingHorizontal: 20,
-    marginTop: -40,
-    zIndex: 10,
-  },
-  searchLabel: {
-    fontSize: 14,
     color: Colors.text,
-    marginBottom: 12,
   },
-  inputRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  input: {
-    flex: 1,
-    height: 48,
-    borderWidth: 1,
-    borderColor: Colors.border,
-    borderRadius: 12,
-    paddingHorizontal: 16,
+  listLink: {
     fontSize: 16,
-    color: Colors.text,
-  },
-  searchButton: {
-    width: 48,
-    height: 48,
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  searchButtonDisabled: {
-    opacity: 0.7,
-  },
-  scrollContent: { padding: 20 },
-  statsRow: {
-    flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
-  },
-  statBox: {
-    flex: 1,
-    marginBottom: 0,
-    padding: 16,
-    alignItems: 'center',
-  },
-  statHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.text,
-  },
-  statDesc: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    textAlign: 'center',
-  },
-  linkText: {
     color: Colors.primary,
-    fontSize: 16,
     fontWeight: '500',
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: 24,
+    left: 20,
+    right: 20,
+    backgroundColor: Colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 100,
+    gap: 8,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 5,
+  },
+  fabText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

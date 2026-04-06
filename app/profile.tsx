@@ -1,10 +1,22 @@
-import { View, Text } from 'react-native';
-import { globalStyles } from '../constants/Styles';
+import { ScrollView, StyleSheet } from 'react-native';
+import { ProfileHeader } from '../components/sections/profile/ProfileHeader';
+import { ProfileStats } from '../components/sections/profile/ProfileStats';
+import { ProfileMenu } from '../components/sections/profile/ProfileMenu';
+import { Colors } from '../constants/Colors';
 
-export default function Screen() {
+export default function ProfileScreen() {
   return (
-    <View style={[globalStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-      <Text>В разработке...</Text>
-    </View>
+    <ScrollView style={styles.container} showsVerticalScrollIndicator={false} bounces={false}>
+      <ProfileHeader />
+      <ProfileStats />
+      <ProfileMenu />
+    </ScrollView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FAFAFA',
+  },
+});
