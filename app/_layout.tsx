@@ -56,7 +56,6 @@ export default function RootLayout() {
         }}
       />
 
-      {/* Скрытый экран результата проверки */}
       <Tabs.Screen
         name="result"
         options={{
@@ -64,9 +63,15 @@ export default function RootLayout() {
           tabBarStyle: { display: 'none' },
         }}
       />
-
       <Tabs.Screen
         name="report"
+        options={{
+          href: null,
+          tabBarStyle: { display: 'none' },
+        }}
+      />
+      <Tabs.Screen
+        name="success"
         options={{
           href: null,
           tabBarStyle: { display: 'none' },

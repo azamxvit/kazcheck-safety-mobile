@@ -18,3 +18,9 @@ export const Colors = {
   cautionLight: '#FFF9E5',
   successLight: '#E8F8EE',
 };
+
+export const Fonts = {
+  regular: 'Roboto',
+  medium: 'RobotoMedium',
+  bold: 'RobotoBold',
+};

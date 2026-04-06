@@ -1,0 +1,10 @@
+{
+  "common": {
+    "loading": "Загрузка...",
+    "error": "Ошибка"
+  },
+  "home": {
+    "title": "KazCheck",
+    "subtitle": "Защита от мошенников"
+  }
+}
