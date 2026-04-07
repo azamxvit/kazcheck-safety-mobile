@@ -14,6 +14,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Colors } from '../constants/Colors';
 import { ScamTypeSelector } from '../components/widgets/report/ScamTypeSelector';
+import { supabase } from '../supabase';
 
 export default function ReportScreen() {
   const router = useRouter();
@@ -24,15 +25,53 @@ export default function ReportScreen() {
   const [scamType, setScamType] = useState<string | null>(null);
   const [description, setDescription] = useState('');
 
-  // Валидация (номер минимум 11 символов + выбран тип)
+  // Стейты загрузки и ошибок
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Валидация
   const isFormValid = phone.length >= 11 && scamType !== null;
 
-  const handleSubmit = () => {
-    if (!isFormValid) return;
+  const handleSubmit = async () => {
+    if (!isFormValid || isLoading) return;
 
-    // Здесь в будущем будет отправка в Supabase!
-    // А пока просто переходим на наш красивый экран успеха:
-    router.push('/success');
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { error: upsertError } = await supabase.from('phone_numbers').upsert(
+        {
+          number: phone,
+          fraud_type: scamType,
+          last_reported: new Date().toISOString(),
+        },
+        {
+          onConflict: 'number',
+          ignoreDuplicates: false,
+        }
+      );
+
+      if (upsertError) throw upsertError;
+
+      // Инкремент количества жалоб
+      await supabase.rpc('increment_report_count', { target_number: phone });
+
+      const { error: insertError } = await supabase.from('reports').insert({
+        phone_number: phone,
+        fraud_type: scamType!,
+        description: description || null,
+        // user_id добавим позже, когда подключим авторизацию
+      });
+
+      if (insertError) throw insertError;
+
+      router.push('/success');
+    } catch (err: any) {
+      console.error('Ошибка отправки жалобы:', err);
+      setError('Не удалось отправить жалобу. Попробуйте ещё раз.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -40,7 +79,6 @@ export default function ReportScreen() {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
-      {/* Кастомная шапка (как на SVG) */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <TouchableOpacity
           style={styles.backButton}
@@ -50,7 +88,7 @@ export default function ReportScreen() {
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Сообщить о мошеннике</Text>
-        <View style={{ width: 24 }} /> {/* Пустой блок для балансировки заголовка по центру */}
+        <View style={{ width: 24 }} />
       </View>
       <View style={styles.divider} />
 
@@ -59,7 +97,6 @@ export default function ReportScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Поле: Номер телефона */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Номер телефона *</Text>
           <TextInput
@@ -69,16 +106,15 @@ export default function ReportScreen() {
             keyboardType="phone-pad"
             value={phone}
             onChangeText={setPhone}
+            editable={!isLoading}
           />
         </View>
 
-        {/* Поле: Тип мошенничества */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Тип мошенничества *</Text>
           <ScamTypeSelector selected={scamType} onSelect={setScamType} />
         </View>
 
-        {/* Поле: Описание */}
         <View style={styles.fieldContainer}>
           <Text style={styles.label}>Описание ситуации (необязательно)</Text>
           <TextInput
@@ -87,24 +123,33 @@ export default function ReportScreen() {
             placeholderTextColor={Colors.textSecondary}
             multiline={true}
             numberOfLines={4}
-            textAlignVertical="top" // Чтобы текст начинался сверху в Android
+            textAlignVertical="top"
             value={description}
             onChangeText={setDescription}
+            editable={!isLoading}
           />
           <Text style={styles.helperText}>
             Ваше описание поможет другим пользователям распознать мошенников
           </Text>
         </View>
 
-        {/* Кнопка отправки */}
+        {/* Вывод ошибки */}
+        {error && <Text style={styles.errorText}>{error}</Text>}
+
+        {/* Кнопка отправки с индикатором загрузки */}
         <TouchableOpacity
-          style={[styles.submitButton, !isFormValid && styles.submitButtonDisabled]}
+          style={[styles.submitButton, (!isFormValid || isLoading) && styles.submitButtonDisabled]}
           activeOpacity={0.8}
           onPress={handleSubmit}
-          disabled={!isFormValid}
+          disabled={!isFormValid || isLoading}
         >
-          <Text style={[styles.submitButtonText, !isFormValid && styles.submitButtonTextDisabled]}>
-            Отправить жалобу
+          <Text
+            style={[
+              styles.submitButtonText,
+              (!isFormValid || isLoading) && styles.submitButtonTextDisabled,
+            ]}
+          >
+            {isLoading ? 'Отправка...' : 'Отправить жалобу'}
           </Text>
         </TouchableOpacity>
       </ScrollView>
@@ -189,7 +234,7 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   submitButtonDisabled: {
-    backgroundColor: '#E5E5EA', // Серый цвет неактивной кнопки как на макете
+    backgroundColor: '#E5E5EA',
     shadowOpacity: 0,
     elevation: 0,
   },
@@ -199,6 +244,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   submitButtonTextDisabled: {
-    color: '#999999', // Темно-серый текст на светло-сером фоне
+    color: '#999999',
+  },
+  errorText: {
+    color: '#FF3B30',
+    fontSize: 13,
+    textAlign: 'center',
+    marginBottom: 12,
   },
 });

@@ -62,6 +62,13 @@ export function HomeHeader({
             )}
           </TouchableOpacity>
         </View>
+
+        {/* Предупреждение о холодном старте бэкенда */}
+        {isLoading && (
+          <Text style={styles.loadingWarning}>
+            Анализируем номер, это может занять до 30 секунд...
+          </Text>
+        )}
       </View>
     </View>
   );
@@ -76,21 +83,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 24,
     borderBottomRightRadius: 24,
   },
-  topRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: 'rgba(255, 255, 255, 0.9)',
-  },
+  topRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  title: { fontSize: 28, fontWeight: 'bold', color: '#fff', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: 'rgba(255, 255, 255, 0.9)' },
   searchCard: {
     backgroundColor: Colors.surface,
     marginHorizontal: 20,
@@ -103,15 +98,8 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 4,
   },
-  searchTitle: {
-    fontSize: 14,
-    color: Colors.text,
-    marginBottom: 12,
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    gap: 12,
-  },
+  searchTitle: { fontSize: 14, color: Colors.text, marginBottom: 12 },
+  inputContainer: { flexDirection: 'row', gap: 12 },
   input: {
     flex: 1,
     height: 48,
@@ -129,5 +117,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingWarning: {
+    color: Colors.textSecondary,
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: 12,
   },
 });

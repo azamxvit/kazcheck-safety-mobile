@@ -60,24 +60,44 @@ export default function HomeScreen() {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.functions.invoke('check-number', {
-        body: { phone: phoneNumber },
+      // Шаг 1: Достаём данные по номеру из Supabase
+      const { data: phoneData, error: dbError } = await supabase
+        .from('phone_numbers')
+        .select('report_count, last_reported, fraud_type')
+        .eq('number', phoneNumber)
+        .maybeSingle();
+
+      if (dbError) throw dbError;
+
+      // Шаг 2: Отправляем в FastAPI для подсчёта скора
+      const response = await fetch('https://kazcheck-safety-scoring.onrender.com/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone_number: phoneNumber,
+          report_count: phoneData?.report_count ?? 0,
+          last_reported: phoneData?.last_reported ?? null,
+        }),
       });
 
-      if (error) throw new Error(error.message);
+      if (!response.ok) throw new Error(`Scoring API вернул ${response.status}`);
 
-      const riskData = data?.data || {};
+      const scoreData = await response.json();
 
+      // Шаг 3: Переходим на экран результата
       router.push({
         pathname: '/result',
         params: {
           phone: phoneNumber,
-          risk: riskData.risk_level || 'unknown',
-          percentage: (riskData.risk_score || 0).toString(),
+          risk: scoreData.risk_level,
+          percentage: String(scoreData.risk_score),
+          fraud_type: phoneData?.fraud_type || 'Не определён',
+          report_count: String(phoneData?.report_count ?? 0),
+          indicators: JSON.stringify(scoreData.fraud_indicators || []),
         },
       });
     } catch (err: any) {
-      Alert.alert('Ошибка соединения', err.message || 'Не удалось проверить номер');
+      Alert.alert('Ошибка', err.message || 'Не удалось проверить номер');
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +106,6 @@ export default function HomeScreen() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor={Colors.primary} />
-
       <ScrollView
         showsVerticalScrollIndicator={false}
         bounces={false}
@@ -98,10 +117,8 @@ export default function HomeScreen() {
           onSearch={handleCheckNumber}
           isLoading={isLoading}
         />
-
         <MiniStatsCard />
 
-        {/* Заголовок списка */}
         <View style={styles.listHeader}>
           <Text style={styles.listTitle}>Проверенные звонки</Text>
           <TouchableOpacity>
@@ -109,7 +126,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* Маппинг */}
         <View style={styles.listContainer}>
           {MOCK_CALLS.map((call) => (
             <CallHistoryCard
@@ -125,7 +141,6 @@ export default function HomeScreen() {
         </View>
       </ScrollView>
 
-      {/* Плавающая кнопка */}
       <TouchableOpacity
         style={styles.fab}
         activeOpacity={0.9}
@@ -138,11 +153,9 @@ export default function HomeScreen() {
   );
 }
 
+// ... оставь styles без изменений (как было в твоем коде)
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FAFAFA',
-  },
+  container: { flex: 1, backgroundColor: '#FAFAFA' },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -150,19 +163,9 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     marginBottom: 16,
   },
-  listTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: Colors.text,
-  },
-  listLink: {
-    fontSize: 16,
-    color: Colors.primary,
-    fontWeight: '500',
-  },
-  listContainer: {
-    paddingHorizontal: 20,
-  },
+  listTitle: { fontSize: 18, fontWeight: 'bold', color: Colors.text },
+  listLink: { fontSize: 16, color: Colors.primary, fontWeight: '500' },
+  listContainer: { paddingHorizontal: 20 },
   fab: {
     position: 'absolute',
     bottom: 24,
@@ -181,9 +184,5 @@ const styles = StyleSheet.create({
     shadowRadius: 12,
     elevation: 5,
   },
-  fabText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  fabText: { color: '#fff', fontSize: 16, fontWeight: '600' },
 });

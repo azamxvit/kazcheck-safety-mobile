@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,6 +8,7 @@ import { globalStyles } from '../constants/Styles';
 import { RISK_CONFIG, RiskType } from '../components/sections/result/config';
 import { RiskIndicatorCard } from '../components/sections/result/RiskIndicatorCard';
 import { DetailsCard } from '../components/sections/result/DetailsCard';
+import { supabase } from '../supabase';
 
 export default function ResultScreen() {
   const router = useRouter();
@@ -15,23 +17,50 @@ export default function ResultScreen() {
   const params = useLocalSearchParams();
   const phone = (params.phone as string) || '+ 7 707 123 4567';
   const riskType = (params.risk as RiskType) || 'danger';
-  const percentage = Number(params.percentage) || 94;
+  const percentage = Number(params.percentage) || 0;
+  const fraudType = (params.fraud_type as string) || 'Не определён';
+  const reportCount = Number(params.report_count) || 0;
+
+  // Безопасный парсинг индикаторов
+  let indicators: string[] = [];
+  try {
+    indicators = JSON.parse((params.indicators as string) || '[]');
+  } catch (e) {
+    console.error('Ошибка парсинга индикаторов:', e);
+  }
 
   const config = RISK_CONFIG[riskType] || RISK_CONFIG.danger;
 
+  useEffect(() => {
+    const saveHistory = async () => {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        await supabase.from('search_history').insert({
+          user_id: user.id,
+          phone_number: phone,
+        });
+      } catch (error) {
+        console.error('Ошибка сохранения истории поиска:', error);
+      }
+    };
+    saveHistory();
+  }, [phone]);
+
   return (
     <View style={[globalStyles.container, { paddingTop: insets.top }]}>
-      {/* Шапка */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
           <Ionicons name="arrow-back" size={24} color={Colors.text} />
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Результат проверки</Text>
-        <View style={{ width: 24 }} /> {/* Заглушка */}
+        <View style={{ width: 24 }} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {/* Номер телефона */}
         <View style={styles.phoneSection}>
           <View style={styles.phoneIconWrapper}>
             <Ionicons name="call-outline" size={24} color={Colors.textSecondary} />
@@ -42,9 +71,9 @@ export default function ResultScreen() {
 
         <RiskIndicatorCard config={config} percentage={percentage} />
 
-        <DetailsCard scamType="Банковское мошенничество" complaintsCount={214} />
+        {/* ПЕРЕДАЕМ ИНДИКАТОРЫ СЮДА */}
+        <DetailsCard scamType={fraudType} complaintsCount={reportCount} indicators={indicators} />
 
-        {/* Кнопки действий */}
         <View style={styles.actionButtons}>
           <TouchableOpacity style={styles.primaryButton} onPress={() => router.push('/report')}>
             <Ionicons name="flag-outline" size={20} color="#fff" />
@@ -70,17 +99,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
   },
   backButton: { padding: 4 },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text,
-  },
+  headerTitle: { fontSize: 18, fontWeight: '600', color: Colors.text },
   content: { padding: 20 },
-  phoneSection: {
-    alignItems: 'center',
-    marginBottom: 24,
-    marginTop: 10,
-  },
+  phoneSection: { alignItems: 'center', marginBottom: 24, marginTop: 10 },
   phoneIconWrapper: {
     width: 56,
     height: 56,
@@ -90,20 +111,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
-  phoneNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: Colors.text,
-    marginBottom: 4,
-  },
-  phoneId: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-  },
-  actionButtons: {
-    marginTop: 24,
-    gap: 12,
-  },
+  phoneNumber: { fontSize: 24, fontWeight: 'bold', color: Colors.text, marginBottom: 4 },
+  phoneId: { fontSize: 14, color: Colors.textSecondary },
+  actionButtons: { marginTop: 24, gap: 12 },
   primaryButton: {
     backgroundColor: Colors.primary,
     height: 56,
@@ -113,11 +123,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
   },
-  primaryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  primaryButtonText: { color: '#fff', fontSize: 16, fontWeight: '600' },
   secondaryButton: {
     backgroundColor: Colors.surface,
     height: 56,
@@ -127,9 +133,5 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.border,
   },
-  secondaryButtonText: {
-    color: Colors.text,
-    fontSize: 16,
-    fontWeight: '600',
-  },
+  secondaryButtonText: { color: Colors.text, fontSize: 16, fontWeight: '600' },
 });
