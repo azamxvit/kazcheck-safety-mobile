@@ -60,7 +60,9 @@ export default function HomeScreen() {
 
     setIsLoading(true);
     try {
-      // Шаг 1: Достаём данные по номеру из Supabase
+      // Амир и остальные, пожайлуста будьте бдительны с этим кодом, он будет отправлять запросы в Supabase и FastAPI,
+      // Так что убедитесь, что у вас всё настроено правильно и не используйте реальные номера без арпува владельцев
+      // Достаём данные по номеру из Supabase
       const { data: phoneData, error: dbError } = await supabase
         .from('phone_numbers')
         .select('report_count, last_reported, fraud_type')
@@ -69,7 +71,7 @@ export default function HomeScreen() {
 
       if (dbError) throw dbError;
 
-      // Шаг 2: Отправляем в FastAPI для подсчёта скора
+      // Отправляем в FastAPI для подсчёта скора
       const response = await fetch('https://kazcheck-safety-scoring.onrender.com/score', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -84,7 +86,7 @@ export default function HomeScreen() {
 
       const scoreData = await response.json();
 
-      // Шаг 3: Переходим на экран результата
+      // Переходим на экран результата
       router.push({
         pathname: '/result',
         params: {
@@ -153,7 +155,6 @@ export default function HomeScreen() {
   );
 }
 
-// ... оставь styles без изменений (как было в твоем коде)
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FAFAFA' },
   listHeader: {

@@ -1,0 +1,10 @@
+{
+  "common": {
+    "loading": "Жүктелуде...",
+    "error": "Қате"
+  },
+  "home": {
+    "title": "KazCheck",
+    "subtitle": "Алаяқтардан қорғау"
+  }
+}

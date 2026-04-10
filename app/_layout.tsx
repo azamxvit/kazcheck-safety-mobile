@@ -1,82 +1,63 @@
-import { Tabs } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+// app/_layout.tsx
+import { useEffect, useState } from 'react';
+import { View, ActivityIndicator } from 'react-native';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { supabase } from '../supabase';
+import { Session } from '@supabase/supabase-js';
 import { Colors } from '../constants/Colors';
 
 export default function RootLayout() {
-  return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textSecondary,
-        tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopWidth: 0,
-          elevation: 10,
-          shadowOpacity: 0.1,
-          height: 60,
-          paddingBottom: 10,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Calls',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="call-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="stats"
-        options={{
-          title: 'Stats',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bar-chart-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="map"
-        options={{
-          title: 'Map',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="map-outline" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          title: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person-outline" size={size} color={color} />
-          ),
-        }}
-      />
+  const router = useRouter();
+  const segments = useSegments();
+  const [session, setSession] = useState<Session | null | undefined>(undefined);
 
-      <Tabs.Screen
-        name="result"
-        options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tabs.Screen
-        name="report"
-        options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-      <Tabs.Screen
-        name="success"
-        options={{
-          href: null,
-          tabBarStyle: { display: 'none' },
-        }}
-      />
-    </Tabs>
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (session === undefined) return;
+
+    const inAuthGroup = segments[0] === 'login' || segments[0] === 'verify';
+
+    if (!session && !inAuthGroup) {
+      router.replace('/login');
+    } else if (session && inAuthGroup) {
+      router.replace('/');
+    }
+  }, [session, segments]);
+
+  if (session === undefined) {
+    return (
+      <SafeAreaProvider>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: Colors.primary,
+          }}
+        >
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      </SafeAreaProvider>
+    );
+  }
+
+  return (
+    <SafeAreaProvider>
+      <Slot /> {/* рендерит текущий активный маршрут */}
+    </SafeAreaProvider>
   );
 }
